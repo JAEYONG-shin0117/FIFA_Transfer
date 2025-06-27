@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
-API_KEY = "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"  # 본인의 OpenRouter API Key
+API_KEY = ""  # 본인의 OpenRouter API Key
 
 app = FastAPI()
 
