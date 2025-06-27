@@ -1,35 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>AI ChatBot</title>
+  <meta charset="UTF-8">
+  <title>FOOTBALL INFORMATION</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #fff;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 0 20px;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 0 20px;
+      overflow-y: auto;
+    }
+
+    #chatBox {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding-bottom: 100px;
+    }
+
+    .chat-message {
+      margin: 10px 0;
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 15px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .user-message {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+      text-align: right;
+    }
+
+    .bot-message {
+      background-color: #f1f0f0;
+      align-self: flex-start;
+      text-align: left;
+    }
+
+    #chat-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 800px;
+      display: flex;
+      gap: 10px;
+      background-color: white;
+    }
+
+    #userInput {
+      flex: 1;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+
+    button {
+      padding: 15px 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
 </head>
 <body>
-    <h2>AI 챗봇과 대화하기</h2>
-    <input type="text" id="userInput" placeholder="메시지를 입력하세요" />
-    <button onclick="sendMessage()">보내기</button>
 
-    <div id="chatBox" style="margin-top:20px;"></div>
+  <header>FOOTBALL INFORMATION</header>
 
-    <script>
-        async function sendMessage() {
-            const userInput = document.getElementById("userInput").value;
+  <main>
+    <div id="chatBox"></div>
+  </main>
 
-            const res = await fetch("http://127.0.0.1:8000/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userInput })
-            });
+  <div id="chat-container">
+    <input type="text" id="userInput" placeholder="질문을 입력하세요" />
+    <button onclick="sendMessage()">SEND</button>
+  </div>
 
-            const data = await res.json();
+  <script>
+    async function sendMessage() {
+      const message = document.getElementById("userInput").value.trim();
+      if (!message) return;
 
-            document.getElementById("chatBox").innerHTML += `
-                <p><b>🧍‍♂️나:</b> ${userInput}</p>
-                <p><b>🤖봇:</b> ${data.response}</p>
-            `;
+      const chatBox = document.getElementById("chatBox");
 
-            document.getElementById("userInput").value = "";
-        }
-    </script>
+      // 사용자 메시지 표시
+      chatBox.innerHTML += `
+        <div class="chat-message user-message"><b>me:</b> ${message}</div>
+      `;
+
+      // 로딩 메시지 표시
+      const loadingElem = document.createElement("div");
+      loadingElem.className = "chat-message bot-message";
+      loadingElem.innerHTML = "<b>🤖 football bot:</b> ⏳ 응답 생성 중...";
+      chatBox.appendChild(loadingElem);
+
+      document.getElementById("userInput").value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const res = await fetch("http://127.0.0.1:8000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+        loadingElem.innerHTML = `<b>🤖 football bot:</b> ${data.response}`;
+      } catch (err) {
+        loadingElem.innerHTML = `<b>🤖 football bot:</b> ❌ 오류: ${err.message}`;
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Enter 키로 전송도 가능하게 설정
+    document.getElementById("userInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+
 </body>
 </html>
